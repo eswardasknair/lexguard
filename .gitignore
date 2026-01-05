@@ -1,0 +1,35 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large ML model files
+ml_models/*.pkl
+
+# Collected static files (can be regenerated)
+staticfiles/
+
+# Temporary/debug scripts
+make_history.py
+
+# Files with API keys (will be added manually)
+analysis_app/ai_explainer.py
