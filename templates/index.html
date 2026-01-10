@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ======== HERO SECTION ======== -->
+<div class="hero-section text-center d-flex align-items-center"
+    style="background: linear-gradient(135deg, #070d1b 0%, #0f1a2e 50%, #07111f 100%); min-height: 88vh; color: white; position:relative; overflow:hidden;">
+
+    <!-- Floating orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Aurora overlay -->
+    <div class="aurora-bg"></div>
+
+    <!-- Particle canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Content -->
+    <div class="container hero-content py-5">
+
+        <!-- AI Badge -->
+        <div class="reveal mb-4">
+            <span class="ai-badge fs-6">
+                <i class="fa-solid fa-microchip"></i>&nbsp;POWERED BY AI MODELS
+            </span>
+        </div>
+
+        <h1 class="display-2 fw-bold mb-4 text-shadow-drop reveal delay-1"
+            style="font-family:'Outfit',sans-serif; letter-spacing:-1.5px; line-height:1.1;">
+            Understand Contracts<br>
+            <span class="text-gradient">in Plain English</span>
+        </h1>
+
+        <p class="lead mb-5 reveal delay-2"
+            style="max-width: 700px; margin: 0 auto; color:rgba(255,255,255,0.7); line-height:1.8;">
+            LexGuard uses advanced AI to instantly spot risky clauses, hidden loopholes, and
+            unfair terms in your legal documents. Upload any contract, and let us explain it
+            simply and clearly.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="d-flex justify-content-center flex-wrap gap-3 mb-5 reveal delay-3">
+            <a href="{% url 'upload' %}" class="btn btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg btn-glow"
+                style="background:linear-gradient(135deg,#4f8ef7,#7c3aed);color:white;border:none;font-size:1.05rem;">
+                <i class="fa-solid fa-file-shield me-2"></i>Analyze a Document Now
+            </a>
+            <a href="{% url 'dashboard' %}"
+                class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold hover-scale"
+                style="border-color:rgba(255,255,255,0.3);">
+                <i class="fa-solid fa-chart-bar me-2"></i>View Past Analyses
+            </a>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="d-flex justify-content-center flex-wrap gap-3 mb-5 reveal delay-4">
+            <span class="trust-badge"><i class="fa-solid fa-lock text-primary"></i> Secure & Private</span>
+            <span class="trust-badge"><i class="fa-solid fa-bolt text-warning"></i> Instant Results</span>
+            <span class="trust-badge"><i class="fa-solid fa-brain text-info"></i> Mistral-7B AI</span>
+            <span class="trust-badge"><i class="fa-solid fa-globe text-success"></i> Bilingual Support</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- ======== HOW IT WORKS ======== -->
+<section style="background:#f0f4fb;" class="py-5">
+    <div class="container py-4">
+        <div class="text-center mb-5 reveal">
+            <span class="badge px-3 py-2 rounded-pill mb-3"
+                style="background:rgba(79,142,247,0.12);color:#4f8ef7;font-size:0.85rem;font-weight:600;border:1px solid rgba(79,142,247,0.3);">
+                HOW IT WORKS
+            </span>
+            <h2 class="fw-bold" style="font-family:'Outfit',sans-serif;font-size:2.2rem;">Three Simple Steps</h2>
+            <p class="text-muted">From upload to insight in under 30 seconds</p>
+        </div>
+        <div class="row g-4 text-center position-relative">
+            <div class="col-md-4 reveal delay-1">
+                <div class="step-number">1</div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 glass-panel" style="background:white;">
+                    <div class="mb-3">
+                        <div class="feature-icon-wrap mx-auto" style="background:rgba(79,142,247,0.15);color:#4f8ef7;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">Upload Document</h5>
+                    <p class="text-muted small lh-lg">Drag & drop any PDF, DOCX, TXT, or even a photo of a printed
+                        contract.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal delay-2">
+                <div class="step-number">2</div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background:white;">
+                    <div class="mb-3">
+                        <div class="feature-icon-wrap mx-auto" style="background:rgba(124,58,237,0.15);color:#7c3aed;">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">AI Processes It</h5>
+                    <p class="text-muted small lh-lg">Our Mistral-7B model extracts, classifies, and scores every clause
+                        automatically.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal delay-3">
+                <div class="step-number">3</div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background:white;">
+                    <div class="mb-3">
+                        <div class="feature-icon-wrap mx-auto" style="background:rgba(6,182,212,0.15);color:#06b6d4;">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">Review Results</h5>
+                    <p class="text-muted small lh-lg">Click any highlighted clause to see a full plain-English
+                        breakdown, risk score & recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======== FEATURE CARDS ======== -->
+<section style="background: linear-gradient(135deg, #0f1a2e 0%, #070d1b 100%);" class="py-5">
+    <div class="container py-4">
+        <div class="text-center mb-5 reveal">
+            <span class="badge px-3 py-2 rounded-pill mb-3"
+                style="background:rgba(124,58,237,0.15);color:#a78bfa;font-size:0.85rem;font-weight:600;border:1px solid rgba(124,58,237,0.3);">
+                FEATURES
+            </span>
+            <h2 class="fw-bold text-white" style="font-family:'Outfit',sans-serif;font-size:2.2rem;">Why Choose
+                LexGuard?</h2>
+            <p class="text-secondary">Everything you need to understand your legal documents</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 reveal-left delay-1">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(79,142,247,0.2);color:#4f8ef7;">
+                        <i class="fa-solid fa-language"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">Bilingual AI Analysis</h5>
+                    <p class="text-secondary lh-lg mt-2">Upload contracts in English. Get plain-language explanations in
+                        your preferred language instantly.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(79,142,247,0.08);">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 reveal delay-2">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(245,158,11,0.2);color:#f59e0b;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">Comprehensive Risk Scoring</h5>
+                    <p class="text-secondary lh-lg mt-2">Every clause is analyzed and given a risk score from 0–100,
+                        highlighting termination traps and liability terms.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(245,158,11,0.08);">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-right delay-3">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(6,182,212,0.2);color:#06b6d4;">
+                        <i class="fa-solid fa-file-image"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">Handles Any Document Format</h5>
+                    <p class="text-secondary lh-lg mt-2">Upload PDFs, Word docs, plain text, or even photos/scans.
+                        Advanced OCR extracts text with high accuracy.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(6,182,212,0.08);">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-left delay-2">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(16,185,129,0.2);color:#10b981;">
+                        <i class="fa-solid fa-gavel"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">12+ Clause Type Detection</h5>
+                    <p class="text-secondary lh-lg mt-2">Identifies termination, liability, indemnification, IP
+                        assignment, non-compete, and more clause types automatically.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(16,185,129,0.08);">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 reveal delay-3">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(239,68,68,0.2);color:#ef4444;">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">PDF Report Download</h5>
+                    <p class="text-secondary lh-lg mt-2">Export a fully formatted legal analysis report in PDF format —
+                        ideal for sharing with advisors or keeping records.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(239,68,68,0.08);">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-right delay-4">
+                <div
+                    class="card h-100 glass-card hover-glow text-white rounded-4 p-4 border-0 position-relative overflow-hidden">
+                    <div class="feature-icon-wrap" style="background:rgba(124,58,237,0.2);color:#a78bfa;">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h5 class="fw-bold mt-2">AI Clause Explanations</h5>
+                    <p class="text-secondary lh-lg mt-2">Get detailed AI-generated explanations, red flag alerts,
+                        potential consequences, and actionable recommendations per clause.</p>
+                    <div class="position-absolute"
+                        style="bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(124,58,237,0.08);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======== CTA BANNER ======== -->
+<section class="py-5"
+    style="background:linear-gradient(135deg,#4f8ef7,#7c3aed,#06b6d4); background-size:200% 200%; animation: aurora-shift 8s ease-in-out infinite alternate;">
+    <div class="container text-center py-3 reveal">
+        <h2 class="fw-bold text-white mb-3" style="font-family:'Outfit',sans-serif;font-size:2rem;">Ready to Decode Your
+            Contract?</h2>
+        <p class="text-white opacity-75 mb-4">Join thousands of people who've used LexGuard to understand their legal
+            documents.</p>
+        <a href="{% url 'upload' %}" class="btn btn-light btn-lg rounded-pill px-5 py-3 fw-bold shadow hover-scale"
+            style="color:#4f8ef7;">
+            <i class="fa-solid fa-file-shield me-2"></i>Start Free Analysis
+        </a>
+    </div>
+</section>
+
+{% endblock %}
