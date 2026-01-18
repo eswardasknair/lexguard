@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-5" style="background:linear-gradient(180deg,#f0f4fb 0%,#eef2f8 100%);min-height:85vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+
+                <!-- Page header -->
+                <div class="text-center mb-4 reveal">
+                    <div class="ai-badge d-inline-flex mb-3">
+                        <i class="fa-solid fa-brain"></i>&nbsp; AI-Powered Document Analysis
+                    </div>
+                    <h2 class="fw-bold mb-1" style="font-family:'Outfit',sans-serif;font-size:2rem;">Upload Your
+                        Document</h2>
+                    <p class="text-muted">PDF, DOCX, TXT, PNG or JPG — we handle them all</p>
+                </div>
+
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden reveal delay-1">
+
+                    <!-- Gradient card header strip -->
+                    <div style="height:5px;background:linear-gradient(90deg,#4f8ef7,#7c3aed,#06b6d4);"></div>
+
+                    <div class="card-body p-5">
+                        <form action="{% url 'upload' %}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+
+                            <!-- Drop Zone -->
+                            <div class="upload-zone text-center p-5 mb-4 rounded-4 position-relative transition-all"
+                                id="dropArea" style="cursor:pointer;">
+                                <div id="uploadIdle">
+                                    <div style="font-size:3.5rem;margin-bottom:12px;">
+                                        <i class="fa-solid fa-cloud-arrow-up"
+                                            style="background:linear-gradient(135deg,#4f8ef7,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">Click or drag file here</h5>
+                                    <p class="text-muted small mb-4">Max file size: 10 MB. For optimal ML analysis speed, we recommend scanning documents of <strong>50 - 100 pages maximum</strong> at a time.</p>
+
+                                    <!-- File type badges -->
+                                    <div>
+                                        <span class="file-type-badge"
+                                            style="color:#ef4444;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);">
+                                            <i class="fa-solid fa-file-pdf"></i> PDF
+                                        </span>
+                                        <span class="file-type-badge"
+                                            style="color:#3b82f6;border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.08);">
+                                            <i class="fa-solid fa-file-word"></i> DOCX
+                                        </span>
+                                        <span class="file-type-badge"
+                                            style="color:#64748b;border-color:rgba(100,116,139,0.3);background:rgba(100,116,139,0.08);">
+                                            <i class="fa-solid fa-file-lines"></i> TXT
+                                        </span>
+                                        <span class="file-type-badge"
+                                            style="color:#10b981;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.08);">
+                                            <i class="fa-solid fa-image"></i> PNG/JPG
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div id="uploadSuccess" class="d-none">
+                                    <div style="font-size:3rem;margin-bottom:12px;">
+                                        <i class="fa-solid fa-circle-check text-success"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success mb-1">File Ready!</h5>
+                                    <strong id="fileNameDisplay" class="text-dark d-block"></strong>
+                                    <small class="text-muted">Click "Start Analysis" when ready</small>
+                                </div>
+
+                                <input type="file" name="document" id="fileInput"
+                                    class="position-absolute w-100 h-100 top-0 start-0 opacity-0"
+                                    style="cursor:pointer;" required onchange="showFileName()">
+                            </div>
+
+                            <!-- Title input -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark" for="docTitle">
+                                    <i class="fa-solid fa-tag me-2 text-primary"></i>Document Title <span
+                                        class="text-muted fw-normal">(optional)</span>
+                                </label>
+                                <input type="text" name="title" id="docTitle"
+                                    class="form-control form-control-lg rounded-3"
+                                    style="border:1.5px solid #e2e8f0;transition:border-color 0.2s;"
+                                    placeholder="e.g. Employment Contract 2026"
+                                    onfocus="this.style.borderColor='#4f8ef7'"
+                                    onblur="this.style.borderColor='#e2e8f0'">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-lg w-100 rounded-pill fw-bold btn-glow" id="submitBtn"
+                                style="background:linear-gradient(135deg,#4f8ef7,#7c3aed);color:white;border:none;padding:14px;font-size:1.05rem;">
+                                <i class="fa-solid fa-shield-cat me-2"></i>Start AI Analysis
+                            </button>
+                        </form>
+
+                        <!-- Loading Overlay -->
+                        <div id="loadingOverlay" class="d-none text-center mt-5">
+                            <div class="analysis-loader mb-4"
+                                style="width:80px;height:80px;margin:0 auto;position:relative;">
+                                <div class="pulse-ring"></div>
+                                <div class="pulse-ring"></div>
+                                <div class="pulse-ring"></div>
+                                <div
+                                    style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7c3aed);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;">
+                                    <i class="fa-solid fa-brain text-white fa-xl"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2" style="color:#4f8ef7;">AI is analyzing your document...</h5>
+                            <p class="text-muted small mb-4">This may take 10–20 seconds</p>
+
+                            <!-- Animated step hints -->
+                            <div class="d-flex flex-column gap-2 text-start" style="max-width:340px;margin:0 auto;">
+                                <div class="d-flex align-items-center gap-3 step-hint" data-delay="0">
+                                    <div
+                                        style="width:28px;height:28px;border-radius:50%;background:rgba(79,142,247,0.15);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-file-import text-primary" style="font-size:0.75rem;"></i>
+                                    </div>
+                                    <span class="small text-muted">Extracting text from document…</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 step-hint" data-delay="4000">
+                                    <div
+                                        style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-scissors" style="color:#7c3aed;font-size:0.75rem;"></i>
+                                    </div>
+                                    <span class="small text-muted">Segmenting &amp; classifying clauses…</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 step-hint" data-delay="8000">
+                                    <div
+                                        style="width:28px;height:28px;border-radius:50%;background:rgba(6,182,212,0.15);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-brain" style="color:#06b6d4;font-size:0.75rem;"></i>
+                                    </div>
+                                    <span class="small text-muted">AI generating explanations…</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 step-hint" data-delay="13000">
+                                    <div
+                                        style="width:28px;height:28px;border-radius:50%;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-chart-bar text-success" style="font-size:0.75rem;"></i>
+                                    </div>
+                                    <span class="small text-muted">Scoring risk levels…</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security note -->
+                <p class="text-center text-muted small mt-3 reveal delay-2">
+                    <i class="fa-solid fa-lock me-1 text-success"></i>
+                    Files are processed securely and never stored permanently.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showFileName() {
+        const input = document.getElementById('fileInput');
+        if (input.files && input.files[0]) {
+            document.getElementById('fileNameDisplay').textContent = input.files[0].name;
+            document.getElementById('uploadIdle').classList.add('d-none');
+            document.getElementById('uploadSuccess').classList.remove('d-none');
+            document.getElementById('dropArea').classList.add('upload-success');
+            document.getElementById('dropArea').classList.remove('upload-zone');
+        }
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', function () {
+        document.getElementById('submitBtn').classList.add('d-none');
+        document.getElementById('loadingOverlay').classList.remove('d-none');
+        // Animate step hints sequentially
+        document.querySelectorAll('.step-hint').forEach(el => {
+            el.style.opacity = '0.3';
+            const delay = parseInt(el.getAttribute('data-delay'));
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.5s';
+                el.style.opacity = '1';
+            }, delay + 500);
+        });
+    });
+
+    // drag-and-drop visual feedback
+    const dropArea = document.getElementById('dropArea');
+    ['dragenter', 'dragover'].forEach(ev => {
+        dropArea.addEventListener(ev, e => { e.preventDefault(); dropArea.classList.add('drag-over'); });
+    });
+    ['dragleave', 'drop'].forEach(ev => {
+        dropArea.addEventListener(ev, e => { e.preventDefault(); dropArea.classList.remove('drag-over'); });
+    });
+</script>
+{% endblock %}

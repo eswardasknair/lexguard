@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-5" style="background-color: #f7f9fc; min-height: 85vh;">
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0 text-dark">Executive Dashboard</h2>
+                <p class="text-muted small mb-0 mt-1">Overview of contract risk analysis and metrics</p>
+            </div>
+            <a href="{% url 'upload' %}" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+                <i class="fa-solid fa-plus me-2"></i>Analyze New Contract
+            </a>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 rounded-3 border-start border-4 border-primary">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.8rem;">Total Documents</h6>
+                            <i class="fa-solid fa-file-contract text-primary fs-5"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{{ total_docs }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 rounded-3 border-start border-4 border-danger">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.8rem;">Critical Clauses</h6>
+                            <i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{{ critical_clauses }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 rounded-3 border-start border-4 border-warning">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.8rem;">High Risk Clauses</h6>
+                            <i class="fa-solid fa-flag text-warning fs-5"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{{ high_clauses }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 rounded-3 border-start border-4 border-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.8rem;">Avg. Risk Score</h6>
+                            <i class="fa-solid fa-chart-line text-info fs-5"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{{ avg_risk }}<span class="fs-5 text-muted fw-normal">/100</span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table Card -->
+        <h5 class="fw-bold text-dark mb-3">Recent Analyses</h5>
+        <div class="card shadow-sm border-0 rounded-3 overflow-hidden bg-white">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light border-bottom">
+                            <tr>
+                                <th class="ps-4 py-3 fw-bold text-secondary text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Document Title</th>
+                                <th class="py-3 fw-bold text-secondary text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Upload Date</th>
+                                <th class="py-3 fw-bold text-secondary text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Status</th>
+                                <th class="py-3 fw-bold text-secondary text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Overall Risk</th>
+                                <th class="text-end pe-4 py-3 fw-bold text-secondary text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in recent_docs %}
+                            <tr>
+                                <td class="ps-4 py-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-light rounded p-2 text-primary border border-primary-subtle">
+                                            <i class="fa-solid fa-file-contract"></i>
+                                        </div>
+                                        <span class="fw-semibold text-dark">{{ doc.title }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-muted small py-4">
+                                    {{ doc.uploaded_at|date:"M d, Y" }}
+                                </td>
+                                <td class="py-4">
+                                    {% if doc.status == 'Completed' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-2 px-2 py-1">
+                                        Completed
+                                    </span>
+                                    {% elif doc.status == 'Processing' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-2 px-2 py-1">
+                                        Processing
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-2 px-2 py-1">
+                                        Pending
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4" style="min-width:180px;">
+                                    {% if doc.overall_risk_score != None %}
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="progress flex-grow-1" style="height: 6px; background-color: #e9ecef;">
+                                            <div class="progress-bar 
+                                                {% if doc.overall_risk_score <= 25 %}bg-success
+                                                {% elif doc.overall_risk_score <= 50 %}bg-warning
+                                                {% elif doc.overall_risk_score <= 75 %}bg-orange
+                                                {% else %}bg-danger{% endif %}" 
+                                                role="progressbar"
+                                                style="width: {{ doc.overall_risk_score }}%;">
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold small
+                                            {% if doc.overall_risk_score <= 25 %}text-success
+                                            {% elif doc.overall_risk_score <= 50 %}text-warning
+                                            {% elif doc.overall_risk_score <= 75 %}text-orange
+                                            {% else %}text-danger{% endif %}">
+                                            {{ doc.overall_risk_score }}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted small">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4 py-4">
+                                    {% if doc.status == 'Completed' %}
+                                    <a href="{% url 'analysis' doc.id %}" class="btn btn-sm btn-outline-primary fw-semibold px-3">
+                                        View Analysis
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-light text-muted px-3" disabled>Waiting</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="text-muted mb-3">
+                                        <i class="fa-regular fa-folder-open fa-3x opacity-50"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1">No documents analyzed yet</h6>
+                                    <p class="small text-muted mb-4">Upload a contract to see metrics and risk scoring.</p>
+                                    <a href="{% url 'upload' %}" class="btn btn-primary px-4">Upload Document</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-orange { background-color: #fd7e14 !important; }
+    .text-orange { color: #fd7e14 !important; }
+</style>
+{% endblock %}
