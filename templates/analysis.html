@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+    /* ── Analysis page local styles ─────────── */
+    body {
+        background: #f7f9fc !important;
+    }
+
+    .highlighter-low { background-color: rgba(16, 185, 129, 0.15); cursor: pointer; border-radius: 3px; transition: .2s; }
+    .highlighter-medium { background-color: rgba(245, 158, 11, 0.22); cursor: pointer; border-radius: 3px; transition: .2s; }
+    .highlighter-high { background-color: rgba(253, 126, 20, 0.22); cursor: pointer; border-radius: 3px; transition: .2s; }
+    .highlighter-critical { background-color: rgba(239, 68, 68, 0.22); cursor: pointer; border-radius: 3px; transition: .2s; }
+
+    .highlighter-low:hover, .active-clause.highlighter-low { background-color: rgba(16, 185, 129, 0.45); box-shadow: 0 0 0 2px #10b981; }
+    .highlighter-medium:hover, .active-clause.highlighter-medium { background-color: rgba(245, 158, 11, 0.50); box-shadow: 0 0 0 2px #f59e0b; }
+    .highlighter-high:hover, .active-clause.highlighter-high { background-color: rgba(253, 126, 20, 0.50); box-shadow: 0 0 0 2px #fd7e14; }
+    .highlighter-critical:hover, .active-clause.highlighter-critical { background-color: rgba(239, 68, 68, 0.50); box-shadow: 0 0 0 2px #ef4444; }
+
+    .clause-btn {
+        border: none;
+        background: transparent;
+        text-align: left;
+        width: 100%;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s, border-left 0.2s;
+        border-left: 4px solid transparent;
+    }
+
+    .clause-btn:hover { background: #f8faff; }
+    .clause-btn.active { background: #f0f6ff !important; border-left: 4px solid #0d6efd !important; }
+
+    .bg-orange { background-color: #fd7e14 !important; }
+    .text-orange { color: #fd7e14; }
+
+    /* Circular risk meter */
+    .risk-ring-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 90px; height: 90px; }
+    .risk-ring-wrap svg { transform: rotate(-90deg); }
+    .risk-ring-bg { fill: none; stroke: #e2e8f0; stroke-width: 8; }
+    .risk-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 1s cubic-bezier(.34, 1.56, .64, 1), stroke 0.5s; }
+    .risk-ring-text { position: absolute; font-size: 1.1rem; font-weight: 800; line-height: 1; text-align: center;}
+
+    /* Info card stack */
+    .info-card {
+        border-radius: 8px;
+        border: 1px solid #e8eef8;
+        background: #fff;
+        padding: 14px 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-4">
+
+    <!-- Page header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary px-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back
+        </a>
+        <div>
+            <h5 class="fw-bold mb-0 text-dark">{{ document.title }}</h5>
+            <small class="text-muted">Analyzed Contract Risk: <strong>{{ document.overall_risk_score }}/100</strong></small>
+        </div>
+        <div class="ms-auto d-flex gap-2">
+            <a href="{% url 'download_report' document.id %}" class="btn btn-sm btn-danger px-4 fw-semibold shadow-sm">
+                <i class="fa-solid fa-file-pdf me-2"></i>Download PDF Report
+            </a>
+            <!-- Trigger Server Reanalysis -->
+            <form action="{% url 'analysis' document.id %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-primary px-3 fw-semibold shadow-sm">
+                    <i class="fa-solid fa-rotate-right me-1"></i>Re-Analyze
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ── Sidebar ── -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden h-100">
+                <div class="card-header bg-white border-bottom pt-3 pb-2 px-3">
+                    <h6 class="fw-bold text-dark mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-list-check me-2 text-primary"></i>Extracted Clauses
+                    </h6>
+                    <p class="text-muted small mb-0 mt-1">Select a clause to review</p>
+                </div>
+                <div class="card-body p-0 custom-scrollbar" style="max-height:75vh;overflow-y:auto;">
+                    <div class="list-group list-group-flush">
+                        {% for clause in clauses %}
+                        <button class="clause-btn list-group-item list-group-item-action" data-clause-id="{{ clause.id }}">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge rounded px-2 py-1 small
+                                    {% if clause.risk_score <= 25 %}bg-success
+                                    {% elif clause.risk_score <= 50 %}bg-warning text-dark
+                                    {% elif clause.risk_score <= 75 %}bg-orange text-white
+                                    {% else %}bg-danger{% endif %} border border-opacity-25" style="font-size: 0.7rem;">
+                                    {{ clause.risk_level|upper }}
+                                </span>
+                                <small class="text-muted fw-bold">{{ clause.risk_score }}/100</small>
+                            </div>
+                            <div class="fw-bold small text-dark text-truncate">{{ clause.clause_type }}</div>
+                            <small class="text-muted d-block text-truncate mt-1" style="max-width:200px;">{{ clause.original_text }}</small>
+                        </button>
+                        {% empty %}
+                        <div class="p-4 text-center text-muted small">No clauses extracted.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Document Text View ── -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden h-100">
+                <div class="card-header bg-white border-bottom pt-3 pb-2 px-3">
+                    <h6 class="fw-bold text-dark mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-file-lines me-2 text-info"></i>Source Document
+                    </h6>
+                    <p class="text-muted small mb-0 mt-1">Interactive text viewer</p>
+                </div>
+                <div class="card-body p-4 custom-scrollbar bg-white"
+                    style="max-height:75vh; overflow-y:auto; line-height:2; font-size:.95rem; color: #333;">
+                    {% for clause in clauses %}
+                    <span id="doc-clause-{{ clause.id }}"
+                        class="doc-text highlighter-{{ clause.risk_level|lower }} px-1 rounded"
+                        onclick="highlightClause({{ clause.id }})">
+                        {{ clause.original_text }}
+                    </span>{% if not forloop.last %} <br><br> {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Detail Panel ── -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden h-100" id="detailPanel">
+                <!-- Data Analytics Dashboard (Shown by Default) -->
+                <div class="card-body p-4" id="detailPlaceholder">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fa-solid fa-chart-pie text-secondary fs-4 me-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">Document Analytics Dashboard</h6>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center bg-light">
+                                <h3 class="fw-bold text-dark mb-0">{{ clauses|length }}</h3>
+                                <p class="text-muted small mb-0 text-uppercase" style="letter-spacing:1px;font-size:0.7rem;">Total Clauses</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center bg-light">
+                                <h3 class="fw-bold text-dark mb-0">{{ document.overall_risk_score }}<span class="fs-6 text-muted">/100</span></h3>
+                                <p class="text-muted small mb-0 text-uppercase" style="letter-spacing:1px;font-size:0.7rem;">System Risk Score</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded p-4 mb-4" style="background: #fff;">
+                        <h6 class="fw-bold text-secondary text-center mb-3" style="font-size: 0.85rem; letter-spacing:0.5px; text-transform:uppercase;">Risk Distribution Matrix</h6>
+                        <div style="position: relative; height: 200px; width: 100%;">
+                            <canvas id="riskDistributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info border-0 bg-opacity-10 py-3 mb-0 text-center">
+                        <i class="fa-solid fa-hand-pointer opacity-75 mb-2 fs-5"></i>
+                        <p class="small text-dark mb-0 fw-medium">Select any clause from the sidebar or click glowing text in the document to drill down into specific legal risks and generate AI Negotiator text.</p>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const ctx = document.getElementById('riskDistributionChart').getContext('2d');
+                    let low=0, med=0, high=0, crit=0;
+                    
+                    // Parse counts from DOM store
+                    const nodes = document.querySelectorAll('#clauseDataStore > div');
+                    nodes.forEach(n => {
+                        const lvl = n.querySelector('.data-level').textContent.trim();
+                        if(lvl === 'Low') low++;
+                        else if(lvl === 'Medium') med++;
+                        else if(lvl === 'High') high++;
+                        else crit++;
+                    });
+
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Low Risk', 'Medium Risk', 'High Risk', 'Critical Risk'],
+                            datasets: [{
+                                data: [low, med, high, crit],
+                                backgroundColor: [
+                                    'rgba(16, 185, 129, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)',
+                                    'rgba(253, 126, 20, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)'
+                                ],
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'right', labels: { usePointStyle: true, padding: 15, font:{size:11} } }
+                            },
+                            cutout: '65%'
+                        }
+                    });
+                });
+            </script>
+
+            <!-- Hidden data store -->
+            <div id="clauseDataStore" class="d-none">
+                {% for clause in clauses %}
+                <div id="data-clause-{{ clause.id }}">
+                    <div class="data-type">{{ clause.clause_type }}</div>
+                    <div class="data-score">{{ clause.risk_score }}</div>
+                    <div class="data-level">{{ clause.risk_level }}</div>
+                    <div class="data-original">{{ clause.original_text }}</div>
+                    <div class="data-simp-en">{{ clause.simplified_english }}</div>
+                    <div class="data-ai">{{ clause.ai_explanation|default_if_none:"" }}</div>
+                    <div class="data-rewritten">{{ clause.ai_rewritten_text|default_if_none:"" }}</div>
+                    <div class="data-meaning">{{ clause.what_this_means }}</div>
+                    <div class="data-risky">{{ clause.why_risky }}</div>
+                    <div class="data-conseq">{{ clause.consequences }}</div>
+                    <div class="data-flags">{{ clause.red_flags }}</div>
+                    <div class="data-recs">{{ clause.recommendations }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var btns = document.querySelectorAll('.clause-btn');
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener('click', function () {
+                highlightClause(this.getAttribute('data-clause-id'));
+            });
+        }
+    });
+
+    function highlightClause(id) {
+        var allBtns = document.querySelectorAll('.clause-btn');
+        for (var j = 0; j < allBtns.length; j++) {
+            allBtns[j].classList.remove('active');
+        }
+        var activeBtn = document.querySelector('.clause-btn[data-clause-id="' + id + '"]');
+        if (activeBtn) activeBtn.classList.add('active');
+
+        var allTexts = document.querySelectorAll('.doc-text');
+        for (var k = 0; k < allTexts.length; k++) {
+            allTexts[k].classList.remove('active-clause');
+        }
+        const textSpan = document.getElementById(`doc-clause-${id}`);
+        if (textSpan) {
+            textSpan.classList.add('active-clause');
+            textSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        renderDetailPanel(id);
+    }
+
+    function renderDetailPanel(id) {
+        const dataDiv = document.getElementById(`data-clause-${id}`);
+        if (!dataDiv) return;
+
+        const type = dataDiv.querySelector('.data-type').textContent.trim();
+        const score = parseInt(dataDiv.querySelector('.data-score').textContent.trim());
+        const level = dataDiv.querySelector('.data-level').textContent.trim();
+        const orig = dataDiv.querySelector('.data-original').textContent.trim();
+        const aiRaw = dataDiv.querySelector('.data-ai').textContent.trim();
+        const aiRewrittenRaw = dataDiv.querySelector('.data-rewritten').textContent.trim();
+        const meaning = dataDiv.querySelector('.data-meaning').textContent.trim();
+        const risky = dataDiv.querySelector('.data-risky').textContent.trim();
+        const conseq = dataDiv.querySelector('.data-conseq').textContent.trim();
+        const flags = dataDiv.querySelector('.data-flags').textContent.trim();
+        const recs = dataDiv.querySelector('.data-recs').textContent.trim();
+
+        let ringColor, badgeBg, badgeText, textClass;
+        if (score <= 25) { ringColor = '#198754'; badgeBg = 'rgba(25,135,84,0.1)'; badgeText = '#198754'; textClass = 'text-success'; }
+        else if (score <= 50) { ringColor = '#ffc107'; badgeBg = 'rgba(255,193,7,0.1)'; badgeText = '#ffc107'; textClass = 'text-warning'; }
+        else if (score <= 75) { ringColor = '#fd7e14'; badgeBg = 'rgba(253,126,20,0.1)'; badgeText = '#fd7e14'; textClass = 'text-orange'; }
+        else { ringColor = '#dc3545'; badgeBg = 'rgba(220,53,69,0.1)'; badgeText = '#dc3545'; textClass = 'text-danger'; }
+        
+        const circumference = 226;
+        const offset = circumference - (score / 100) * circumference;
+
+        const aiSectionHtml = aiRaw && aiRaw !== 'None' ? `
+            <div class="info-card border-primary border-opacity-25" style="background:#f8f9fa;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fa-solid fa-robot text-primary" style="font-size:.85rem;"></i>
+                    <span class="fw-bold small text-uppercase text-primary" style="letter-spacing:.5px;">AI Plain English</span>
+                </div>
+                <p class="small text-dark mb-0 fw-medium lh-lg">${escHtml(aiRaw)}</p>
+            </div>
+        ` : `
+            <div class="info-card border-primary border-opacity-25 bg-white text-center py-4" id="ai-generate-card-${id}">
+                <i class="fa-solid fa-microchip text-primary fs-4 mb-2"></i>
+                <h6 class="fw-bold text-dark">Get AI Deep Dive</h6>
+                <p class="small text-muted px-3">Generate a plain-English explanation of this clause using advanced NLP models.</p>
+                <button class="btn btn-primary btn-sm px-4 fw-semibold mt-2" onclick="generateAI(${id})">
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Generate Explanation
+                </button>
+            </div>
+        `;
+
+        let rewriteHtml = '';
+        if (level === 'High' || level === 'Critical') {
+            rewriteHtml = aiRewrittenRaw && aiRewrittenRaw !== 'None' ? `
+                <div class="info-card border-success border-opacity-50 mt-3" style="background:#f0fae6;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-scale-balanced text-success" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-success" style="letter-spacing:.5px;">AI Negotiator (Safer Alternative)</span>
+                    </div>
+                    <p class="small text-dark mb-0 fw-medium lh-lg fst-italic">${escHtml(aiRewrittenRaw)}</p>
+                </div>
+            ` : `
+                <div class="info-card border-success border-opacity-25 bg-white text-center py-4 mt-3" id="ai-rewrite-card-${id}">
+                    <i class="fa-solid fa-handshake-angle text-success fs-4 mb-2"></i>
+                    <h6 class="fw-bold text-dark">AI Negotiator</h6>
+                    <p class="small text-muted px-3">Draft a safer, mutual alternative for this high-risk clause.</p>
+                    <button class="btn btn-outline-success btn-sm px-4 fw-semibold mt-2" onclick="rewriteClause(${id})">
+                        <i class="fa-solid fa-pen-nib me-2"></i>Rewrite Clause
+                    </button>
+                </div>
+            `;
+        }
+
+        const panel = document.getElementById('detailPanel');
+        panel.innerHTML = `
+        <div class="card-header bg-white border-bottom px-4 pt-4 pb-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="risk-ring-wrap flex-shrink-0">
+                    <svg width="90" height="90" viewBox="0 0 90 90">
+                        <circle class="risk-ring-bg" cx="45" cy="45" r="36"/>
+                        <circle class="risk-ring-fill" id="ring-${id}" cx="45" cy="45" r="36" stroke="${ringColor}" stroke-dashoffset="${circumference}"/>
+                    </svg>
+                    <span class="risk-ring-text ${textClass}">${score}</span>
+                </div>
+                <div>
+                    <span class="badge rounded px-2 py-1 mb-2" style="background:${badgeBg};color:${badgeText};border:1px solid ${badgeText}40;font-size:.7rem;">${level} Risk</span>
+                    <h5 class="fw-bold text-dark mb-0">${type}</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4 custom-scrollbar" style="max-height:65vh;overflow-y:auto;background-color:#f8f9fa;">
+            <div class="d-flex flex-column gap-3">
+                <div class="info-card">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-file-contract text-secondary" style="font-size:.85rem;"></i>
+                        <span class="fw-bold text-secondary small text-uppercase" style="letter-spacing:.5px;">Source Clause Text</span>
+                    </div>
+                    <p class="small text-dark mb-0 fst-italic lh-lg">${escHtml(orig)}</p>
+                </div>
+
+                <div id="ai-container-${id}">${aiSectionHtml}</div>
+                <div id="ai-rewrite-container-${id}">${rewriteHtml}</div>
+
+                ${meaning ? `
+                <div class="info-card border-info border-opacity-25">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-circle-info text-info" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-secondary" style="letter-spacing:.5px;">Standard Meaning</span>
+                    </div>
+                    <p class="small text-muted mb-0 lh-lg">${escHtml(meaning)}</p>
+                </div>` : ''}
+
+                ${risky ? `
+                <div class="info-card border-danger border-opacity-25">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-secondary" style="letter-spacing:.5px;">Risk Assessment</span>
+                    </div>
+                    <p class="small text-muted mb-0 lh-lg">${escHtml(risky)}</p>
+                </div>` : ''}
+
+                ${recs ? `
+                <div class="info-card border-success border-opacity-25">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-lightbulb text-success" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-secondary" style="letter-spacing:.5px;">Actionable Advice</span>
+                    </div>
+                    <p class="small text-muted mb-0 lh-lg">${escHtml(recs)}</p>
+                </div>` : ''}
+            </div>
+        </div>
+        `;
+
+        requestAnimationFrame(() => {
+            const ring = document.getElementById(`ring-${id}`);
+            if (ring) ring.style.strokeDashoffset = offset;
+        });
+    }
+
+    function generateAI(id) {
+        const btnCard = document.getElementById(`ai-generate-card-${id}`);
+        if(btnCard) {
+            btnCard.innerHTML = `<div class="py-4 text-center"><div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div><p class="small text-muted mb-0">AI Generating Plain English Details...</p></div>`;
+        }
+
+        fetch(`/api/explain_clause/${id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.explanation) {
+                const dataDiv = document.getElementById(`data-clause-${id}`);
+                dataDiv.querySelector('.data-ai').textContent = data.explanation;
+                
+                const cont = document.getElementById(`ai-container-${id}`);
+                cont.innerHTML = `
+                <div class="info-card border-primary border-opacity-25" style="background:#f8f9fa;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-robot text-primary" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-primary" style="letter-spacing:.5px;">AI Plain English</span>
+                    </div>
+                    <p class="small text-dark mb-0 fw-medium lh-lg">${escHtml(data.explanation)}</p>
+                </div>`;
+            } else {
+                if(btnCard) btnCard.innerHTML = `<p class="text-danger small mb-0">Failed to generate. AI service overloaded.</p>`;
+            }
+        })
+        .catch(err => {
+            if(btnCard) btnCard.innerHTML = `<p class="text-danger small mb-0">Failed to generate explanation. Check connection.</p>`;
+        });
+    }
+
+    function rewriteClause(id) {
+        const btnCard = document.getElementById(`ai-rewrite-card-${id}`);
+        if(btnCard) {
+            btnCard.innerHTML = `<div class="py-4 text-center"><div class="spinner-border spinner-border-sm text-success mb-2" role="status"></div><p class="small text-muted mb-0">AI Negotiator drafting safe alternative...</p></div>`;
+        }
+
+        fetch(`/api/rewrite_clause/${id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.rewritten_text) {
+                const dataDiv = document.getElementById(`data-clause-${id}`);
+                dataDiv.querySelector('.data-rewritten').textContent = data.rewritten_text;
+                
+                const cont = document.getElementById(`ai-rewrite-container-${id}`);
+                cont.innerHTML = `
+                <div class="info-card border-success border-opacity-50 mt-3" style="background:#f0fae6;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-scale-balanced text-success" style="font-size:.85rem;"></i>
+                        <span class="fw-bold small text-uppercase text-success" style="letter-spacing:.5px;">AI Negotiator (Safer Alternative)</span>
+                    </div>
+                    <p class="small text-dark mb-0 fw-medium lh-lg fst-italic">${escHtml(data.rewritten_text)}</p>
+                </div>`;
+            } else {
+                if(btnCard) btnCard.innerHTML = `<p class="text-danger small mb-0">AI Rewrite service overloaded.</p>`;
+            }
+        })
+        .catch(err => {
+            if(btnCard) btnCard.innerHTML = `<p class="text-danger small mb-0">Failed to rewrite clause. Check connection.</p>`;
+        });
+    }
+
+    function escHtml(str) {
+        return (str || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+</script>
+{% endblock %}
