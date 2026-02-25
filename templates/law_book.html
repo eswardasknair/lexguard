@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-5" style="background-color: #f7f9fc; min-height: 85vh;">
+    <div class="container">
+        <!-- Header & Search -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <h2 class="fw-bold mb-0 text-dark">Indian Corporate Law Book</h2>
+                <p class="text-muted small mt-1 mb-0">Search through the Indian Contract Act, IT Act, and related corporate acts.</p>
+            </div>
+            <div class="col-md-6">
+                <form action="{% url 'lawbook' %}" method="GET" class="d-flex">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" 
+                               value="{{ query|default_if_none:'' }}" 
+                               placeholder="Search for 'Termination', 'Liability', 'Section 73'...">
+                        <button class="btn btn-primary px-4 fw-semibold" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if query %}
+        <div class="mb-3">
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
+                <i class="fa-solid fa-filter me-2"></i>Showing results for: <strong>"{{ query }}"</strong>
+                <a href="{% url 'lawbook' %}" class="ms-2 text-primary" style="text-decoration: none;">&times; Clear</a>
+            </span>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Left Sidebar Navigation -->
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow-sm border-0 rounded-3 position-sticky" style="top: 20px;">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h6 class="fw-bold text-uppercase text-secondary mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Indexed Acts</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for resource in resources %}
+                            <a href="#act-{{ resource.id }}" class="list-group-item list-group-item-action py-3 border-bottom text-dark fw-medium" style="font-size: 0.9rem;">
+                                {{ resource.title }}
+                                {% if resource.year %}
+                                <span class="badge bg-light text-secondary border float-end">{{ resource.year }}</span>
+                                {% endif %}
+                            </a>
+                            {% empty %}
+                            <div class="p-4 text-muted text-center small">No acts indexed.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="col-lg-9">
+                {% if sections %}
+                    {% for section in sections %}
+                    <div class="card shadow-sm border-0 rounded-3 mb-4" id="act-{{ section.law.id }}">
+                        <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-secondary mb-2">{{ section.law.title }} {% if section.law.year %}({{ section.law.year }}){% endif %}</span>
+                                <h5 class="fw-bold text-primary mb-0">{{ section.section_number }}{% if section.title %} - {{ section.title }}{% endif %}</h5>
+                            </div>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <p class="text-dark mb-0 lh-lg" style="font-size: 0.95rem; text-align: justify;">
+                                {{ section.content|linebreaksbr }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="card shadow-sm border-0 rounded-3 text-center py-5">
+                        <div class="card-body py-5">
+                            <div class="text-muted mb-3"><i class="fa-solid fa-scale-balanced fa-3x opacity-50"></i></div>
+                            <h5 class="fw-bold text-dark">No sections found</h5>
+                            <p class="text-muted mb-0">Try adjusting your search query or clear the filter.</p>
+                            {% if query %}
+                            <a href="{% url 'lawbook' %}" class="btn btn-outline-primary mt-3">View All Laws</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
