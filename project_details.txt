@@ -1,0 +1,206 @@
+LEXGUARD: AI-POWERED LEGAL DOCUMENT ANALYSIS SYSTEM
+PROJECT DOCUMENTATION
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. INTRODUCTION
+2. OBJECTIVES
+3. EXISTING SYSTEM
+4. PROPOSED SYSTEM
+5. MOTIVATIONS
+6. FUNCTIONALITIES
+7. MODULE DESCRIPTION
+8. DEVELOPING ENVIRONMENT
+9. SPRINT PLAN
+10. PRODUCT BACKLOG
+11. USER STORY
+12. PROJECT PLAN
+13. METHODOLOGY
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+LexGuard is a sophisticated AI-powered legal document analysis application designed to bridge the gap between complex legal terminology and everyday understanding. By leveraging state-of-the-art Natural Language Processing (NLP) models, LexGuard automatically scans contracts, identifies high-risk clauses, provides simplified English explanations, and offers actionable legal recommendations. The system is built to assist individuals and businesses in making informed decisions without the immediate need for expensive manual legal reviews of every standard document.
+
+================================================================================
+2. OBJECTIVES
+================================================================================
+* Automate the identification of critical risks in legal contracts (e.g., Termination, Liability, IP Assignment).
+* Translate "legalese" into simplified, plain English for better user comprehension.
+* Provide a centralized dashboard for managing and tracking analyzed documents.
+* Offer professional-grade PDF reports summarizing legal risks and red flags.
+* Minimize the time and cost spent on preliminary legal document screening.
+* Support various file formats including PDF, Word, and Image-based scans via OCR.
+
+================================================================================
+3. EXISTING SYSTEM
+================================================================================
+The current standard for legal document review is primarily manual.
+* High Dependency: Users rely heavily on legal professionals for even minor document clarifications.
+* Time Consuming: Manual review by experts can take days or weeks depending on workload.
+* Expensive: Legal fees for routine contract review are prohibitively high for many small businesses.
+* Human Error: Fatigue or oversight during manual scanning can lead to missing subtle but dangerous clauses.
+* Lack of Immediate Tools: No accessible tool exists for an instant, high-level risk overview before deep legal engagement.
+
+================================================================================
+4. PROPOSED SYSTEM
+================================================================================
+LexGuard proposes a technology-first approach to legal transparency.
+* AI-Driven Analysis: Uses InLegalBERT and rule-based NLP engines to provide instant clause-by-clause analysis.
+* Automated Risk Scoring: Quantifies legal risk on a scale of 0-100 across categories (Low to Critical).
+* Interactive UI: High-performance web dashboard built with Django for seamless file handling and results display.
+* Integrated OCR: Built-in capability to read text from scanned images and photos of physical documents.
+* Intelligent Explanations: Goes beyond simple summary to explain 'Why' a clause is risky and what the 'Consequences' could be.
+
+================================================================================
+5. MOTIVATIONS
+================================================================================
+* Empowering Users: To give non-legal professionals the tools to understand what they are signing.
+* Efficiency in Legal Work: Enabling lawyers to focus on strategy rather than repetitive clause identification.
+* Risk Mitigation: Reducing the likelihood of businesses entering into unfavorable or one-sided agreements.
+* Accessibility: Providing legal-tech tools to a wider demographic who cannot afford full-time legal counsel.
+
+================================================================================
+6. FUNCTIONALITIES
+================================================================================
+* Multi-Format Support: Process .pdf, .docx, .txt, and image files (.jpg, .png).
+* Intelligent Extraction: Advanced text extraction using PyMuPDF and fallback OCR logic.
+* Clause Segmentation: Automatically breaks documents into logical legal sections.
+* Risk Assessment: Categorizes clauses into Termination, Liability, Indemnification, etc.
+* Simplified UI: Dashboard for file history, upload management, and interactive analysis views.
+* PDF Export: Generation of detailed, professional reports using ReportLab.
+* Fallback Engine: Seamless transition between deep learning models and high-accuracy rule-based systems.
+
+================================================================================
+7. MODULE DESCRIPTION
+================================================================================
+* CORE MODULE (core): Handles overall project settings, URL routing, and security configurations.
+* ANALYSIS ENGINE (analysis_app): The primary application hosting the logic for document management and results processing.
+* INFERENCE SERVICE (ml_inference): Features the `LexGuardInference` class that integrates Transformers and Rule-based logic.
+* TEXT UTILITIES (ocr_utils): Specialized module for handling Tesseract/OCR processing for scanned documents.
+* DATA LAYER: SQL-based persistence for storing document metadata and granular clause analysis results.
+* FRONTEND LAYER: Responsive templates providing a clean, professional user experience with real-time feedback.
+
+================================================================================
+8. DEVELOPING ENVIRONMENT
+================================================================================
+* Programming Language: Python 3.10+
+* Web Framework: Django 5.x
+* Frontend: HTML5, CSS3, JavaScript (Vanilla)
+* NLP/ML Libraries: Transformers (InLegalBERT), PyTorch
+* Document Processing: PyMuPDF, python-docx, OCR (Tesseract)
+* Report Generation: ReportLab
+* Database: SQLite (Development) / PostgreSQL (Production)
+* OS: Windows / Linux
+
+================================================================================
+9. SPRINT PLAN
+================================================================================
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| Backlog Item             | Completion | Hours | D1| D2| D3| D4| D5| D6| D7| D8| D9|D10|D11|D12|D13|D14|
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| SPRINT 1                 |            |       |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Requirement Analysis     | 31/12/2025 | 20    | 7 | 7 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| System Design & Arch     | 03/01/2026 | 20    | 0 | 0 | 5 | 5 | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| DB & Platform Setup      | 07/01/2026 | 25    | 0 | 0 | 0 | 0 | 0 | 5 | 5 | 5 | 5 | 5 | 0 | 0 | 0 | 0 |
+| OCR & Text Extraction    | 11/01/2026 | 25    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 5 | 5 | 5 | 5 |
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| SPRINT 2                 |            |       |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Core Backend API         | 04/02/2026 | 30    | 5 | 5 | 4 | 4 | 4 | 4 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Clause Segmenter Logic   | 08/02/2026 | 35    | 0 | 0 | 0 | 0 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 0 | 0 | 0 |
+| Rule-Based Engine        | 11/02/2026 | 25    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 5 | 5 | 5 | 5 |
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| SPRINT 3                 |            |       |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| InLegalBERT Integration  | 23/02/2026 | 30    | 6 | 6 | 6 | 6 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Risk Scoring Logic       | 01/03/2026 | 35    | 0 | 0 | 0 | 0 | 0 | 6 | 6 | 6 | 6 | 6 | 5 | 0 | 0 | 0 |
+| Simplified Explanations  | 04/03/2026 | 25    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9 | 8 | 8 |
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| SPRINT 4                 |            |       |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Analysis Dashboard UI    | 25/03/2026 | 35    | 5 | 5 | 5 | 4 | 4 | 4 | 4 | 4 | 0 | 0 | 0 | 0 | 0 | 0 |
+| PDF Report Generation    | 29/03/2026 | 25    | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 4 | 4 | 4 | 4 | 4 | 0 | 0 |
+| Testing & Documentation  | 31/03/2026 | 30    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 6 | 6 | 6 | 6 |
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+| TOTAL                    | 31/03/2026 | 360   | 23| 23| 26| 19| 24| 29| 29| 24| 20| 36| 30| 29| 24| 24|
++--------------------------+------------+-------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+================================================================================
+10. PRODUCT BACKLOG
+================================================================================
++----+--------------------------------+----------+------------------+-------------+
+| ID | NAME                           | PRIORITY | ESTIMATE (Hours) | STATUS      |
++----+--------------------------------+----------+------------------+-------------+
+| 1  | Requirement Analysis           | High     | 20               | Completed   |
+| 2  | System Design & Architecture   | High     | 20               | Completed   |
+| 3  | DB & Platform Setup            | High     | 25               | Completed   |
+| 4  | OCR & Text Extraction          | High     | 25               | Completed   |
+| 5  | Core Backend API               | High     | 30               | Completed   |
+| 6  | Clause Segmenter Logic         | High     | 35               | Completed   |
+| 7  | Rule-Based Engine              | High     | 25               | Completed   |
+| 8  | InLegalBERT Integration        | High     | 30               | Completed   |
+| 9  | Risk Scoring Logic             | High     | 35               | Completed   |
+| 10 | Simplified Explanations        | High     | 25               | Completed   |
+| 11 | Analysis Dashboard UI          | Medium   | 35               | Planned     |
+| 12 | PDF Report Generation          | Medium   | 25               | Planned     |
+| 13 | Testing & Documentation        | Medium   | 30               | Planned     |
++----+--------------------------------+----------+------------------+-------------+
+|    | TOTAL                          |          | 360              |             |
++----+--------------------------------+----------+------------------+-------------+
+
+================================================================================
+11. USER STORY
+================================================================================
++-----+-------------------+------------------------------------------+-------------------------------------------+
+| ID  | As a type of User | I want to...                             | So that I can...                          |
++-----+-------------------+------------------------------------------+-------------------------------------------+
+| 1   | BUSINESS OWNER    | Upload contracts and see risk scores;    | Understand legal liabilities quickly;     |
+|     |                   | View simplified English explanations;    | Decide if I need a lawyer's review;       |
+|     |                   | Export PDF reports                       | Share summaries with my team              |
++-----+-------------------+------------------------------------------+-------------------------------------------+
+| 2   | LEGAL ASSISTANT   | Identify red flags automatically         | Focus on complex drafting instead of      |
+|     |                   |                                          | routine scanning                          |
++-----+-------------------+------------------------------------------+-------------------------------------------+
+| 3   | FREELANCER        | Verify IP ownership and termination      | Ensure my rights are protected in         |
+|     |                   | clauses                                  | service agreements                        |
++-----+-------------------+------------------------------------------+-------------------------------------------+
+| 4   | SYSTEM            | Segment text and apply NLP models        | Provide accurate and granular risk        |
+|     |                   |                                          | assessments                               |
++-----+-------------------+------------------------------------------+-------------------------------------------+
+
+================================================================================
+12. PROJECT PLAN
+================================================================================
++---------+--------------------------+------------+------------+------+-------------+
+| Task ID | Task Name                | Start Date | End Date   | Days | Status      |
++---------+--------------------------+------------+------------+------+-------------+
+| SPRINT 1|                          | 29/12/2025 | 11/01/2026 | 14   | Completed   |
+| 1       | Requirement Analysis     | 29/12/2025 | 31/12/2025 | 3    | Completed   |
+| 2       | System Design & Arch     | 31/12/2025 | 03/01/2026 | 4    | Completed   |
+| 3       | DB & Platform Setup      | 03/01/2026 | 07/01/2026 | 5    | Completed   |
+| 4       | OCR & Text Extraction    | 07/01/2026 | 11/01/2026 | 5    | Completed   |
++---------+--------------------------+------------+------------+------+-------------+
+| SPRINT 2|                          | 19/01/2026 | 11/02/2026 | 24   | Completed   |
+| 5       | Core Backend API         | 19/01/2026 | 04/02/2026 | 7    | Completed   |
+| 6       | Clause Segmenter Logic   | 02/02/2026 | 08/02/2026 | 7    | Completed   |
+| 7       | Rule-Based Engine        | 07/02/2026 | 11/02/2026 | 5    | Completed   |
++---------+--------------------------+------------+------------+------+-------------+
+| SPRINT 3|                          | 19/02/2026 | 04/03/2026 | 14   | Completed   |
+| 8       | InLegalBERT Integration  | 19/02/2026 | 23/02/2026 | 5    | Completed   |
+| 9       | Risk Scoring Logic       | 24/02/2026 | 01/03/2026 | 6    | Completed   |
+| 10      | Simplified Explanations  | 02/03/2026 | 04/03/2026 | 3    | Completed   |
++---------+--------------------------+------------+------------+------+-------------+
+| SPRINT 4|                          | 18/03/2026 | 31/03/2026 | 14   | Planned     |
+| 11      | Analysis Dashboard UI    | 18/03/2026 | 25/03/2026 | 8    | Planned     |
+| 12      | PDF Report Generation    | 24/03/2026 | 29/03/2026 | 6    | Planned     |
+| 13      | Testing & Documentation  | 27/03/2026 | 31/03/2026 | 5    | Planned     |
++---------+--------------------------+------------+------------+------+-------------+
+
+================================================================================
+13. METHODOLOGY
+================================================================================
+The project follows the Agile Scrum Methodology to ensure flexibility and iterative growth.
+* Incremental Delivery: Features are developed in two-week cycles (Sprints).
+* Adaptive Planning: Feedback from each sprint informs the priorities of the next.
+* Quality Focus: Automated unit testing and manual QA are integrated into every phase.
+* Collaborative Design: Continuous alignment between AI logic and real-world standards.
+* Time-Boxed Development: Strict adherence to the provided timeline ensures delivery by Mar 31, 2026.
